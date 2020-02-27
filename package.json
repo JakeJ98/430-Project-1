@@ -8,8 +8,16 @@
     "pretest": "eslint ./src --fix",
     "test": "echo \"Tests complete\""
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RITJake/430-Project-1.git"
+  },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RITJake/430-Project-1/issues"
+  },
+  "homepage": "https://github.com/RITJake/430-Project-1#readme",
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-airbnb": "^18.0.1",
