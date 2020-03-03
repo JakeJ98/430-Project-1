@@ -1,4 +1,29 @@
-const users = {};
+const users = {
+    "Bob": {
+    "usersName": "Jake",
+    "name": "wum",
+    "race": "Human",
+    "class": "Fighter",
+    "strength": "15",
+    "dexterity": "13",
+    "constitution": "13",
+    "intelligence": "10",
+    "wisdom": "12",
+    "charisma": "9"
+  },
+  "Rob": {
+    "usersName": "John",
+    "name": "tim",
+    "race": "Gnome",
+    "class": "Barbarian",
+    "strength": "17",
+    "dexterity": "12",
+    "constitution": "15",
+    "intelligence": "9",
+    "wisdom": "10",
+    "charisma": "7"
+  }
+};
 
 const respondJSON = (request, response, status, object) =>{
 
@@ -30,23 +55,20 @@ const respondJSONMeta = (request, response, status) => {
 const addUser = (request, response, body) => {
     //default json message
     const responseJSON = {
-      message: 'Name, race, class, and stats are required.',
+      message: 'Creator, Name, race, class, and stats are required.',
     };
   
+    console.log(body.usersName);
+    console.log(body.name);
+    console.log(body.race);
+    console.log(body.class);
+    console.log(body.strength);
+    console.log(body.dexterity);
+    console.log(body.constitution);
 
-    console.dir(body.name);
-    console.dir(body.race);
-    console.dir(body.class);
-    console.dir(body.strength);
-    console.dir(body.dexterity);
-    console.dir(body.constitution);
-
-    //check to make sure we have both fields
-    //We might want more validation than just checking if they exist
-    //This could easily be abused with invalid types (such as booleans, numbers, etc)
-    //If either are missing, send back an error message as a 400 badRequest
-    if (!body.name || !body.race || !body.class || !body.strength || !body.constitution || !body.dexterity || !body.intelligence || !body.wisdom || !body.charisma) {
-      responseJSON.id = `missing params ${body.name}`;
+    
+    if (!body.usersName || !body.name || !body.race || !body.class) {
+      responseJSON.id = `missing params`;
       return respondJSON(request, response, 400, responseJSON);
     }
   
@@ -55,14 +77,16 @@ const addUser = (request, response, body) => {
   
     //if that user's name already exists in our object
     //then switch to a 204 updated status
-    if (users[body.name]) {
+    if (users[body.usersName] && users[body.name]) {
       responseCode = 204;
     } else {
       //otherwise create an object with that name
       users[body.name] = {};
+      
     }
   
     //add or update fields for this user name
+    users[body.name].usersName = body.usersName;
     users[body.name].name = body.name;
     users[body.name].race= body.race;
     users[body.name].class= body.class;
@@ -73,15 +97,12 @@ const addUser = (request, response, body) => {
     users[body.name].wisdom= body.wisdom;
     users[body.name].charisma= body.charisma;
   
-    //if response is created, then set our created message
-    //and sent response with a message
+    
     if (responseCode === 201) {
       responseJSON.message = 'Created Successfully';
       return respondJSON(request, response, responseCode, responseJSON);
     }
-    // 204 has an empty payload, just a success
-    // It cannot have a body, so we just send a 204 without a message
-    // 204 will not alter the browser in any way!!!
+    
     return respondJSONMeta(request, response, responseCode);
   };
 

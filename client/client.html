@@ -4,8 +4,9 @@
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
   
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
-  <script type="text/babel">
+  <script>
 
 const parseJSON = (xhr, content) =>{
   if (!xhr.response) {
@@ -24,10 +25,39 @@ const parseJSON = (xhr, content) =>{
     content.appendChild(p);
   }
 
+  
   if (obj.users) {
-    const userList = document.createElement('p');
+    const userList = document.createElement('div');
+    
     const users = JSON.stringify(obj.users);
-    userList.textContent = users;
+    console.log(obj);
+    console.log(obj.users);
+
+    //console.log(obj.users.wum);
+    console.log("Triggered Start")
+
+    var count = Object.keys(obj).length;
+    
+    console.log(count)
+    //for (let i = 0; i < count; i++) {
+    for(i in obj.users){
+        console.log("Triggered: "+obj.users[i].name)
+        
+        //const user = ;
+        //const user = Object.keys(obj);
+        console.log(obj.users[i].name);
+        console.log(obj.users[i].race)
+       
+        const card = document.createElement('div');
+        card.classList.add("card");
+        userList.appendChild(card);
+        card.innerHTML = `<b>${obj.users[i].usersName}</b> <p>${obj.users[i].name}</p><p>${obj.users[i].race}</p><p>${obj.users[i].class}</p><p>Strength: ${obj.users[i].strength}</p><p>Dexterity: ${obj.users[i].dexterity}</p><p>Constitution: ${obj.users[i].constitution}</p><p>Intelligence: ${obj.users[i].intelligence}</p><p>Wisdom: ${obj.users[i].wisdom}</p><p>Charisma: ${obj.users[i].charisma}</p>`
+        //console.log(user);
+    }
+    
+        
+   // userList.textContent = users;
+    
     content.appendChild(userList);
   }
 }
@@ -37,13 +67,13 @@ const handleResponse = (xhr) =>{
 
  switch (xhr.status) {
    case 200:
-     content.innerHTML = '<b>Success</b>'
+     content.innerHTML = '<b>Characters Loaded</b>'
      break;
    case 201:
-   content.innerHTML = '<b>Created</b>'
+   content.innerHTML = '<b>Character Created!</b>'
      break;
    case 204:
-   content.innerHTML = '<b>Updated (no content)</b>'
+   content.innerHTML = '<b>Character Updated</b>'
      break;
    case 400:
    content.innerHTML = '<b>Bad Request</b>'
@@ -64,12 +94,12 @@ const sendPost = (e, nameForm) => {
       //prevent the browser's default action (to send the form on its own)
       e.preventDefault();
       
-      //grab the forms action (url to go to)
-      //and method (HTTP method - POST in this case)
+      
       const nameAction = nameForm.getAttribute('action');
       const nameMethod = nameForm.getAttribute('method');
       
-      //grab the form's name and age fields so we can check user input
+      //get all the fields
+      const usersNameField = nameForm.querySelector('#usersNameField');
       const nameField = nameForm.querySelector('#nameField');
       const raceField = nameForm.querySelector('#raceField');
       const classField = nameForm.querySelector('#classField');
@@ -81,37 +111,20 @@ const sendPost = (e, nameForm) => {
       const chaField = nameForm.querySelector('#chaField');
      
       
-      //create a new Ajax request (remember this is asynchronous)
+      
       const xhr = new XMLHttpRequest();
-      //set the method (POST) and url (action field from form)
+     
       xhr.open(nameMethod, nameAction);
-      
-      //set our request type to x-www-form-urlencoded
-      //which is one of the common types of form data. 
-      //This type has the same format as query strings key=value&key2=value2
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-      //set our requested response type in hopes of a JSON response
       xhr.setRequestHeader ('Accept', 'application/json');
-      
-      //set our function to handle the response
+
       xhr.onload = () => handleResponse(xhr);
+     
+      const formData = `usersName=${usersNameField.value}&name=${nameField.value}&race=${raceField.value}&class=${classField.value}&strength=${strField.value}&dexterity=${dexField.value}&constitution=${conField.value}&intelligence=${intField.value}&wisdom=${wisField.value}&charisma=${chaField.value}`;
       
-      //build our x-www-form-urlencoded format. Without ajax the 
-      //browser would do this automatically but it forcefully changes pages
-      //which we don't want.
-      //The format is the same as query strings, so key=value&key2=value2
-      //The 'name' fields from the inputs are the variable names sent to
-      //the server. 
-      //So ours might look like  name=test&age=22
-      //Again the 'name' fields in the form are the variable names in the string
-      //and the variable names the server will look for.
-      const formData = `Name=${nameField.value}&Race=${raceField.value} &Class=${classField.value}&Strength=${strField.value}&Dexterity=${dexField.value}&Constitution=${conField.value}&Intelligence=${intField.value}&Wisdom=${wisField.value}&Charisma=${chaField.value}`;
-      
-      //send our request with the data
       xhr.send(formData);
     
-      //return false to prevent the browser from trying to change page
-      return false;
+       return false;
     };
 
 
@@ -119,10 +132,8 @@ const sendPost = (e, nameForm) => {
 const sendAjax =(e)=>{
     e.preventDefault();
 
-    const urlField = document.querySelector('#urlField');
-    const methodSelect = document.querySelector('#methodSelect');
-    const urlAction = urlField.value;
-    const selectAction = methodSelect.value;
+    const urlAction = '/getUsers';
+    const selectAction = "get";
 
 
     const xhr = new XMLHttpRequest();
@@ -139,11 +150,34 @@ const sendAjax =(e)=>{
 
     return false;
   }  
+  const sendSearchAjax =(e)=>{
+    e.preventDefault();
+
+    const userField = document.querySelector('#userField');
+    const urlAction = userField.value;
+    const selectAction = "get";
+
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.open(selectAction, urlAction);
+
+    xhr.setRequestHeader("Accept", 'application/json');
+
+    xhr.onload = () => handleResponse(xhr);
+
+
+    xhr.send();
+
+
+    return false;
+  }
 
   
   const init =() =>{
       const nameForm = document.querySelector('#nameForm');
       const userForm = document.querySelector('#userForm');
+      const searchForm = document.querySelector('#searchForm');
 
       const addUser =(e) => sendPost(e, nameForm);
 
@@ -151,7 +185,8 @@ const sendAjax =(e)=>{
 
 
       nameForm.addEventListener('submit', addUser);
-      userForm.addEventListener('submit', getUser);
+      nameForm.addEventListener('submit', getUser);
+      searchForm.addEventListener('submit',getUser);
     };
 
     window.onload = init;
@@ -159,10 +194,18 @@ const sendAjax =(e)=>{
 </head>
 <body>
   <section id="top">
-    <h3>POST Status Code Tests</h3>
+    <h1 id="title">Dungeons &amp; Dragons</h1>
+    <h2>Character Generator</h2>
+    <div id="form">
     <form id="nameForm" action="/addUser" method="post">
+
+      <label for="usersName">Creators Name: </label>
+      <input id="usersNameField" type="text" name="usersName" />
+      <br>
+
       <label for="name">Name: </label>
       <input id="nameField" type="text" name="name" />
+      <br>
       <label for="race">Race: </label>
       <select id="raceField" name="race">
         <option value="Human">Human</option>
@@ -175,6 +218,7 @@ const sendAjax =(e)=>{
         <option value="Half-Orc">Half-Orc</option>  
         <option value="Tiefiling">Tiefiling</option>      
       </select>
+      <br>
       <label for="class">Class: </label>
       <select id="classField" name="race">
             <option value="Barbarian">Barbarian</option>
@@ -190,31 +234,34 @@ const sendAjax =(e)=>{
             <option value="Warlock">Warlock</option>    
             <option value="Wizard">Wizard</option>          
           </select>
+        <br>
       <label for="strength">Strength: </label>
-      <input id="strField" type="number" name="strength" min="0" max="20" step="1"/>
+      <input id="strField" type="number" name="strength" min="0" max="20" step="1" value="10"/>
+      <br>
       <label for="dexterity">Dexterity: </label>
-      <input id="dexField" type="number" name="dexterity" min="0" max="20" step="1"/>
+      <input id="dexField" type="number" name="dexterity" min="0" max="20" step="1" value="10"/>
+      <br>
       <label for="constitution">Constitution: </label>
-      <input id="conField" type="number" name="constitution" min="0" max="20" step="1"/>
+      <input id="conField" type="number" name="constitution" min="0" max="20" step="1" value="10"/>
+      <br>
       <label for="intelligence">Intelligence: </label>
-      <input id="intField" type="number" name="intelligence" min="0" max="20" step="1"/>
+      <input id="intField" type="number" name="intelligence" min="0" max="20" step="1" value="10"/>
+      <br>
       <label for="wisdom">Wisdom: </label>
-      <input id="wisField" type="number" name="wisdom" min="0" max="20" step="1"/>
+      <input id="wisField" type="number" name="wisdom" min="0" max="20" step="1" value="10"/>
+      <br>
       <label for="charisma">Charisma: </label>
-      <input id="chaField" type="number" name="charisma" min="0" max="20" step="1"/>
-      <input type="submit" value="Add User" />
+      <input id="chaField" type="number" name="charisma" min="0" max="20" step="1" value="10"/>
+      <br>
+      <input type="submit" value="Create" />
     </form>
-
-    <form id="userForm" action="/getUsers" method="get">
-      <select id='urlField'>
-        <option value='/getUsers'>/getUsers</option>
-        <option value='/notReal'>/notReal</option>
-      </select>
-      <select id="methodSelect">
-        <option value="get">GET</option>
-        <option value="head">HEAD</option>
-      </select>
-      <input type="submit" value="Get User" />
+    </div>
+    
+   
+    <form id="searchForm" action="/searchUsers" method="get">
+        <label for="findCreation">Find Creation by User </label>
+      <input id="userField" type="text" name="user"/>
+      <input type="submit" value="Search"/>
     </form>
   </section>
   <section id="content">
